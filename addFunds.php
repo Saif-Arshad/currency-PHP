@@ -33,10 +33,13 @@ $success = $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $account_id = isset($_POST['account_id']) ? (int)$_POST['account_id'] : 0;
     $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : 0;
+    $card_number = isset($_POST['card_number']) ? trim($_POST['card_number']) : '';
 
     // Validate input
     if ($account_id <= 0 || $amount <= 0) {
         $error = 'Please select a valid account and enter a positive amount.';
+    } elseif (!preg_match('/^\d{11}$/', $card_number)) {
+        $error = 'Please enter a valid 11-digit card number.';
     } else {
         // Verify account belongs to user
         $stmt = $conn->prepare(
@@ -74,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Add Funds - SecureFX</title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
         body {
@@ -115,6 +118,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </option>
                         <?php endforeach; ?>
                     </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Card Number</label>
+                <div class="mt-1 relative rounded-md shadow-sm">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-feather="credit-card" class="h-5 w-5 text-gray-400"></i>
+                    </div>
+                    <input name="card_number" type="text" maxlength="11" placeholder="Enter 11-digit card number" required
+                           class="pl-10 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                 </div>
             </div>
             <div>
