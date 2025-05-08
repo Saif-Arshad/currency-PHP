@@ -108,7 +108,7 @@ $transactions = $txnStmt->execute();
                 <?= $tx['FromSymbol'] . number_format($tx['Amount'],2) ?>
                 → <?= $tx['ToSymbol'] ?>
               </td>
-              <td class="px-4 py-3 text-sm text-right"><?= $tx['FromSymbol'] . number_format($tx['Fee'],2) ?></td>
+              <td class="px-4 py-3 text-sm text-right"><?=  number_format($tx['Fee'],2) ?></td>
               <td class="px-4 py-3 text-sm text-right"><?= date('M j, Y H:i', strtotime($tx['Time'])) ?></td>
               <td class="px-4 py-3 text-center text-sm font-semibold <?= $statusClass ?>">
                 <?= htmlspecialchars($tx['Status']) ?>
