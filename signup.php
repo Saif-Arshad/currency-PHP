@@ -1,10 +1,7 @@
 <?php
-// ─────────────────────────────────────────────────────────
-//  customer-signup.php – Currenzy Currency Transfer App
-//  Registers a customer + opens their first account
-// ─────────────────────────────────────────────────────────
+
 try {
-    $db = new PDO('sqlite:Currenzy.db');
+    $db = new PDO('sqlite:SecureFX.db');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $db->exec('PRAGMA journal_mode = WAL');
 } catch (PDOException $e) {
@@ -101,110 +98,94 @@ $currencies = $db->query(
 )->fetchAll(PDO::FETCH_KEY_PAIR);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"> 
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Customer Signup – Currenzy</title>
-<style>
-    * { box-sizing: border-box; }
-    body {
-        font-family: Arial, sans-serif;
-        background: #f5f5f5;
-        margin: 0;
+<title>Customer Signup – SecureFX</title>
+
+<!-- Tailwind (stand‑alone CDN build) -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+        colors: { primary: { DEFAULT: '#9D7BED', 600: '#7951B2' } },
+        dropShadow: { glow: '0 0 8px rgba(157, 123, 237, 0.45)' }
+      }
     }
-    .container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 20px;
-    }
-    form {
-        background: #fff;
-        padding: 24px 32px;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, .07);
-        width: 100%;
-        max-width: 400px;
-    }
-    h2 {
-        margin: 0 0 20px;
-        text-align: center;
-        color: #333;
-    }
-    input, select, button {
-        width: 100%;
-        padding: 12px;
-        margin-top: 8px;
-        border-radius: 6px;
-        border: 1px solid #ddd;
-        font-size: 16px;
-    }
-    button {
-        background: #28a745;
-        color: #fff;
-        border: none;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background 0.3s;
-    }
-    button:hover {
-        background: #218838;
-    }
-    .message {
-        margin: 15px 0;
-        padding: 10px;
-        border-radius: 4px;
-        text-align: center;
-    }
-    .success { background: #d4edda; color: #155724; }
-    .error { background: #f8d7da; color: #721c24; }
-    a {
-        color: #007bff;
-        text-decoration: none;
-    }
-    a:hover {
-        text-decoration: underline;
-    }
-</style>
+  };
+    (function() {
+      const theme = localStorage.getItem('theme');
+      if (theme === 'dark') document.documentElement.classList.add('dark');
+    })();
+</script>
+
+<!-- Heroicons -->
+<script src="https://unpkg.com/feather-icons"></script>
+
+
 </head>
-<body>
-<div class="container">
-    <form method="POST" autocomplete="off">
-        <h2>Create Customer Account</h2>
+<body class="min-h-screen bg-gradient-to-br dark:from-black dark:via-zinc-900 dark:to-neutral-900 from-white via-gray-100 to-gray-200 text-gray-900 dark:text-gray-100 flex items-center justify-center">
 
-        <?php if ($success): ?>
-            <div class="message success">
-                Registration successful!<br>
-                <a href="login.php">Login now</a>
-            </div>
-        <?php elseif ($error): ?>
-            <div class="message error"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
+<div class="container bg-white dark:bg-black mx-auto">
+  <div class="mx-auto flex w-full max-w-6xl shadow-lg rounded-3xl overflow-hidden">
+    <div class="hidden lg:block w-1/2">
+      <img src="./Assets/register.jpg" alt="Student practicing math on a tablet" class="h-full w-full object-cover" />
+    </div>
+    <div class="w-full lg:w-1/2 p-8 sm:p-12 md:p-16 lg:p-20 glass">
+      <header class="mb-6 text-start">
+        <h1 class="text-3xl font-extrabold tracking-tight drop-shadow-glow">Create Customer Account</h1>
+        <p class="mt-1 text-gray-400 text-sm">Join SecureFX today!</p>
+      </header>
 
-        <input type="text" name="first_name" placeholder="First Name" required>
-        <input type="text" name="last_name" placeholder="Last Name" required>
-        <input type="email" name="email" placeholder="Email Address" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
-        <input type="tel" name="phone" placeholder="Phone Number" required>
-        <input type="date" name="dob" required>
-        <input type="text" name="address" placeholder="Full Address" required>
+      <?php if ($success): ?>
+        <div class="mb-4 p-4 bg-green-100 dark:bg-green-900 text-green-800 rounded">
+          Registration successful! <a href="login.php" class="underline">Login now</a>
+        </div>
+      <?php elseif ($error): ?>
+        <div class="mb-4 p-4 bg-red-100 dark:bg-red-900 text-red-800 rounded">
+          <?= htmlspecialchars($error) ?>
+        </div>
+      <?php endif; ?>
 
-        <select name="currency_id" required>
-            <option value="">Select Account Currency</option>
-            <?php foreach ($currencies as $id => $label): ?>
-                <option value="<?= htmlspecialchars($id) ?>"><?= htmlspecialchars($label) ?></option>
-            <?php endforeach; ?>
+      <form method="POST" autocomplete="off" class="space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <input type="text" name="first_name" placeholder="First Name" required class="w-full rounded-lg border border-neutral-700 bg-neutral-800/10 dark:bg-neutral-800/70 py-3 px-4 text-sm placeholder-gray-500 focus:border-primary focus:ring-primary/40 focus:outline-none transition" />
+          <input type="text" name="last_name" placeholder="Last Name" required class="w-full rounded-lg border border-neutral-700 bg-neutral-800/10 dark:bg-neutral-800/70 py-3 px-4 text-sm placeholder-gray-500 focus:border-primary focus:ring-primary/40 focus:outline-none transition" />
+        </div>
+        <input type="email" name="email" placeholder="Email Address" required class="w-full rounded-lg border border-neutral-700 bg-neutral-800/10 dark:bg-neutral-800/70 py-3 px-4 text-sm placeholder-gray-500 focus:border-primary focus:ring-primary/40 focus:outline-none transition" />
+          <input type="password" name="password" placeholder="Password" required class="w-full rounded-lg border border-neutral-700 bg-neutral-800/10 dark:bg-neutral-800/70 py-3 px-4 text-sm placeholder-gray-500 focus:border-primary focus:ring-primary/40 focus:outline-none transition" />
+          <input type="password" name="confirm_password" placeholder="Confirm Password" required class="w-full rounded-lg border border-neutral-700 bg-neutral-800/10 dark:bg-neutral-800/70 py-3 px-4 text-sm placeholder-gray-500 focus:border-primary focus:ring-primary/40 focus:outline-none transition" />
+          <input type="tel" name="phone" placeholder="Phone Number" required class="w-full rounded-lg border border-neutral-700 bg-neutral-800/10 dark:bg-neutral-800/70 py-3 px-4 text-sm placeholder-gray-500 focus:border-primary focus:ring-primary/40 focus:outline-none transition" />
+          <input type="date" name="dob" required class="w-full rounded-lg border border-neutral-700 bg-neutral-800/10 dark:bg-neutral-800/70 py-3 px-4 text-sm placeholder-gray-500 focus:border-primary focus:ring-primary/40 focus:outline-none transition" />
+        <input type="text" name="address" placeholder="Full Address" required class="w-full rounded-lg border border-neutral-700 bg-neutral-800/10 dark:bg-neutral-800/70 py-3 px-4 text-sm placeholder-gray-500 focus:border-primary focus:ring-primary/40 focus:outline-none transition" />
+        <select name="currency_id" required class="w-full rounded-lg border border-neutral-700 bg-neutral-800/10 dark:bg-neutral-800/70 py-3 px-4 text-sm placeholder-gray-500 focus:border-primary focus:ring-primary/40 focus:outline-none transition">
+          <option value="">Select Account Currency</option>
+          <?php foreach ($currencies as $id => $label): ?>
+            <option value="<?= htmlspecialchars($id) ?>"><?= htmlspecialchars($label) ?></option>
+          <?php endforeach; ?>
         </select>
-
-        <button type="submit">Create Account</button>
-        
-        <p style="text-align: center; margin-top: 15px;">
-            Already have an account? <a href="login.php">Sign in</a>
+        <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-primary hover:bg-[#7951B2] transition focus:outline-none focus:ring-2 focus:ring-primary/50 font-semibold text-[#0A0A0D]">
+          Create Account
+        </button>
+        <p class="text-center text-sm text-gray-400 dark:text-gray-500">
+          Already have an account? <a href="./login.php" class="font-medium text-primary hover:underline">Sign in</a>
         </p>
-    </form>
+      </form>
+    </div>
+  </div>
 </div>
+
+  <script>
+    feather.replace();
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+  </script>
 </body>
 </html>

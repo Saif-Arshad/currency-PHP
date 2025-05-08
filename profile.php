@@ -5,31 +5,28 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$db = new SQLite3('Currenzy.db');
+$db = new SQLite3('SecureFX.db');
 
 // Get user details
-$userStmt = $db->prepare("
-    SELECT u.*, c.Country 
-    FROM User u
-    JOIN Account a ON u.User_ID = a.User_ID
-    JOIN Currency c ON a.Currency_ID = c.Currency_ID
-    WHERE u.User_ID = :user_id
-");
+$userStmt = $db->prepare(
+    "SELECT u.*, c.Country FROM User u
+     JOIN Account a ON u.User_ID = a.User_ID
+     JOIN Currency c ON a.Currency_ID = c.Currency_ID
+     WHERE u.User_ID = :user_id"
+);
 $userStmt->bindValue(':user_id', $_SESSION['user_id']);
 $userResult = $userStmt->execute();
 $user = $userResult->fetchArray(SQLITE3_ASSOC);
-
 if (!$user) {
     die("User not found");
 }
 
 // Get account details
-$accountStmt = $db->prepare("
-    SELECT a.*, c.Currency_code, c.Symbol
-    FROM Account a
-    JOIN Currency c ON a.Currency_ID = c.Currency_ID
-    WHERE a.User_ID = :user_id
-");
+$accountStmt = $db->prepare(
+    "SELECT a.*, c.Currency_code, c.Symbol FROM Account a
+     JOIN Currency c ON a.Currency_ID = c.Currency_ID
+     WHERE a.User_ID = :user_id"
+);
 $accountStmt->bindValue(':user_id', $_SESSION['user_id']);
 $accountResult = $accountStmt->execute();
 $account = $accountResult->fetchArray(SQLITE3_ASSOC);
@@ -40,118 +37,124 @@ $account = $accountResult->fetchArray(SQLITE3_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile - Currenzy</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            min-height: 100vh;
+    <title>Profile - SecureFX</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              brand: '#3b82f6',
+              'brand-dark': '#60a5fa'
+            }
+          }
         }
-        .profile-container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 30px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        .profile-header {
-            border-bottom: 2px solid #eee;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-        .info-item {
-            margin-bottom: 15px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .info-label {
-            font-weight: 600;
-            color: #666;
-        }
-        .info-value {
-            color: #333;
-        }
-    </style>
+      };
+    </script>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
 </head>
-<body>
+<body class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors">
 
-    <div class="profile-container">
-        <div class="profile-header">
-            <h2 class="mb-3">User Profile</h2>
-            <div class="d-flex justify-content-between align-items-center">
-                <h4><?= htmlspecialchars($user['First_name'] . ' ' . $user['Last_name']) ?></h4>
-                <span class="badge bg-primary"><?= htmlspecialchars($user['User_type']) ?></span>
+  <!-- Theme Toggle -->
+  <div class="fixed top-4 right-4">
+    <button id="themeToggle" class="p-2 rounded-lg bg-white dark:bg-gray-800 shadow focus:outline-none">
+      <i data-feather="sun" class="w-5 h-5 text-yellow-400 hidden dark:block"></i>
+      <i data-feather="moon" class="w-5 h-5 text-gray-800 dark:hidden"></i>
+    </button>
+  </div>
+
+  <div class="max-w-4xl mx-auto py-12 px-4">
+    <!-- Header -->
+    <div class="flex items-center space-x-6 mb-10">
+        <div>
+            <div class="w-24 h-24 rounded-full bg-brand dark:bg-brand-dark text-white flex items-center justify-center text-4xl font-bold">
+                <?= htmlspecialchars(substr($user['First_name'], 0, 1)) ?>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <h4 class="mb-4">Personal Information</h4>
-                <div class="info-item">
-                    <div class="info-label">Email</div>
-                    <div class="info-value"><?= htmlspecialchars($user['Email']) ?></div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Phone Number</div>
-                    <div class="info-value"><?= htmlspecialchars($user['Phone']) ?></div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Date of Birth</div>
-                    <div class="info-value"><?= date('F j, Y', strtotime($user['DOB'])) ?></div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Address</div>
-                    <div class="info-value"><?= htmlspecialchars($user['Address']) ?></div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <h4 class="mb-4">Account Information</h4>
-                <div class="info-item">
-                    <div class="info-label">Account Number</div>
-                    <div class="info-value"><?= htmlspecialchars($account['Account_number']) ?></div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Account Currency</div>
-                    <div class="info-value">
-                        <?= htmlspecialchars($account['Currency_code']) ?> 
-                        (<?= htmlspecialchars($account['Symbol']) ?>)
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Account Balance</div>
-                    <div class="info-value">
-                        <?= htmlspecialchars($account['Symbol'] . number_format($account['Balance'], 2)) ?>
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Transaction Limit</div>
-                    <div class="info-value">
-                        <?= htmlspecialchars($account['Symbol'] . number_format($account['Transaction_limit'], 2)) ?>
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Country</div>
-                    <div class="info-value"><?= htmlspecialchars($user['Country']) ?></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-4 d-flex gap-2">
-            <a href="edit-profile.php" class="btn btn-primary">Edit Profile</a>
-            <a href="change-password.php" class="btn btn-outline-secondary">Change Password</a>
-        </div>
+      <!-- <img
+        src="<?= htmlspecialchars($user['Avatar'] ?? '/assets/default-avatar.png') ?>"
+        alt="Avatar"
+        class="w-24 h-24 rounded-full ring-4 ring-brand dark:ring-brand-dark"
+      /> -->
+      <div>
+        <h1 class="text-3xl font-extrabold"><?= htmlspecialchars($user['First_name'] . ' ' . $user['Last_name']) ?></h1>
+        <span class="inline-block mt-2 px-4 py-1 bg-brand text-white rounded-full text-sm">
+          <?= htmlspecialchars($user['User_type']) ?>
+        </span>
+      </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Main Grid -->
+    <div class="grid gap-6 lg:grid-cols-2">
+      <!-- Personal Info -->
+      <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow p-6 space-y-4">
+        <h2 class="text-2xl font-semibold">Personal Information</h2>
+        <dl class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
+            <dd class="mt-1 text-lg font-medium"><?= htmlspecialchars($user['Email']) ?></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Phone</dt>
+            <dd class="mt-1 text-lg font-medium"><?= htmlspecialchars($user['Phone']) ?></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Birth</dt>
+            <dd class="mt-1 text-lg font-medium"><?= date('F j, Y', strtotime($user['DOB'])) ?></dd>
+          </div>
+          <div class="sm:col-span-2">
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Address</dt>
+            <dd class="mt-1 text-lg font-medium"><?= htmlspecialchars($user['Address']) ?></dd>
+          </div>
+          <div class="sm:col-span-2">
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Country</dt>
+            <dd class="mt-1 text-lg font-medium"><?= htmlspecialchars($user['Country']) ?></dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Account Info -->
+      <!-- <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-6 space-y-4">
+        <h2 class="text-2xl font-semibold">Account Information</h2>
+        <dl class="space-y-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Account Number</dt>
+            <dd class="mt-1 text-lg font-medium"><?= htmlspecialchars($account['Account_number']) ?></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Currency</dt>
+            <dd class="mt-1 text-lg font-medium"><?= htmlspecialchars($account['Currency_code'] . ' (' . $account['Symbol'] . ')') ?></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Balance</dt>
+            <dd class="mt-1 text-lg font-medium"><?= htmlspecialchars($account['Symbol'] . number_format($account['Balance'], 2)) ?></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Limit</dt>
+            <dd class="mt-1 text-lg font-medium"><?= htmlspecialchars($account['Symbol'] . number_format($account['Transaction_limit'], 2)) ?></dd>
+          </div>
+        </dl>
+      </div> -->
+    </div>
+  </div>
+
+  <script>
+    // Initialize Feather icons
+    feather.replace();
+    // Theme toggle logic
+    const toggle = document.getElementById('themeToggle');
+    toggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      const theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+      localStorage.setItem('theme', theme);
+    });
+    // Apply saved theme
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
 </body>
 </html>

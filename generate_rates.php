@@ -1,5 +1,5 @@
 <?php
-$db = new SQLite3('Currenzy.db');
+$db = new SQLite3('SecureFX.db');
 $base_currency_id = 1; // Assuming USD is ID 1
 $date = '2025-02-05';
 

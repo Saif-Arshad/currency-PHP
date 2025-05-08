@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id'])) {
 $account_id = $_GET['account_id'] ?? 0;
 
 try {
-    $conn = new PDO("sqlite:Currenzy.db");
+    $conn = new PDO("sqlite:SecureFX.db");
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     die("DB error: " . $e->getMessage());

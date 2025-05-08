@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-    $conn = new PDO("sqlite:Currenzy.db");
+    $conn = new PDO("sqlite:SecureFX.db");
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     die("DB error: " . $e->getMessage());
@@ -31,7 +31,7 @@ $user = $uStmt->fetch(PDO::FETCH_ASSOC);
         <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" class="me-2" viewBox="0 0 16 16">
             <path d="M7.063 1.5a2 2 0 0 0-2 2V7h-.563a.5.5 0 0 0-.354.146L.5 10.793l.354.354 3.146-3.147H5v4.207l2.146 2.147.708-.708L5.707 11H8V3.5a2 2 0 0 0-2-2Zm1.874 0a2 2 0 0 1 2 2V7h.563a.5.5 0 0 1 .354.146l3.646 3.647-.354.354L12 8.353V12.5a2 2 0 0 1-2 2H8v-1h2a1 1 0 0 0 1-1V3.5a1 1 0 0 0-1-1H8.937Z"/>
         </svg>
-        <span class="fw-bold fs-5">Currenzy</span>
+        <span class="fw-bold fs-5">SecureFX</span>
     </div>
 
     <!-- Navigation -->
